@@ -21,7 +21,7 @@ type Stage = 0 | 1 | 2 | 3 | 4 | 5;
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 const PROFILE_IMG =
-  "/assets/uploads/chatgpt_image_mar_30_2026_01_06_38_am-019d3d7e-1a59-77f5-8f94-fc7a48b8818b-2.png";
+  "/assets/chatgpt_image_mar_30_2026_01_06_38_am-019d5b87-866b-76ae-8e64-4f073de1d383.png";
 
 const SERVICES = [
   {
@@ -574,12 +574,91 @@ function ChatbotWidget() {
     {
       id: 1,
       role: "bot",
-      text: "Hi! I'm Haseeb's AI Assistant. How can I help you with AI automation today?",
+      text: "Hi! 👋 I'm Haseeb's AI Assistant — your smart project consultant.\n\nWhat type of project are you looking for?\n🤖 AI Agent\n🌐 Website\n⚡ Automation\n💻 Custom Software\n\nOr just tell me your business problem and I'll suggest the perfect solution! 🚀",
       time: now(),
     },
   ]);
   const [input, setInput] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [listening, setListening] = useState(false);
+  const [hasNotification, setHasNotification] = useState(true);
+  const [showAutoPopup, setShowAutoPopup] = useState(false);
+  const [popupDismissed, setPopupDismissed] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
+  // Inject keyframes once
+  useEffect(() => {
+    if (document.getElementById("chatbot-widget-styles")) return;
+    const style = document.createElement("style");
+    style.id = "chatbot-widget-styles";
+    style.textContent = `
+      @keyframes chatbot-float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-8px); }
+      }
+      @keyframes chatbot-bounce {
+        0%, 100% { transform: translateY(0px) scale(1); }
+        30% { transform: translateY(-10px) scale(1.05); }
+        60% { transform: translateY(-4px) scale(1.02); }
+      }
+      @keyframes chatbot-pulse-ring {
+        0% { box-shadow: 0 0 0 0 rgba(124,58,237,0.6), 0 0 20px rgba(79,111,255,0.4); }
+        70% { box-shadow: 0 0 0 16px rgba(124,58,237,0), 0 0 30px rgba(79,111,255,0.6); }
+        100% { box-shadow: 0 0 0 0 rgba(124,58,237,0), 0 0 20px rgba(79,111,255,0.4); }
+      }
+      @keyframes chatbot-glow-ring {
+        0%, 100% { opacity: 0.5; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.08); }
+      }
+      @keyframes chatbot-slide-up {
+        from { opacity: 0; transform: translateY(20px) scale(0.95); }
+        to { opacity: 1; transform: translateY(0px) scale(1); }
+      }
+      @keyframes chatbot-typing-dot {
+        0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+        40% { transform: scale(1); opacity: 1; }
+      }
+      @keyframes chatbot-tooltip-in {
+        from { opacity: 0; transform: translateX(8px); }
+        to { opacity: 1; transform: translateX(0px); }
+      }
+      @keyframes chatbot-notif-pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.3); }
+      }
+      @keyframes chatbot-mic-pulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.6); }
+        70% { box-shadow: 0 0 0 8px rgba(239,68,68,0); }
+      }
+    `;
+    document.head.appendChild(style);
+  }, []);
+
+  // Show tooltip after 3s if chat is closed
+  useEffect(() => {
+    if (open) {
+      setShowTooltip(false);
+      return;
+    }
+    const t = setTimeout(() => setShowTooltip(true), 3000);
+    return () => clearTimeout(t);
+  }, [open]);
+
+  // Auto-engagement popup after 6 seconds
+  useEffect(() => {
+    if (popupDismissed) return;
+    const showTimer = setTimeout(() => {
+      if (!open) setShowAutoPopup(true);
+    }, 6000);
+    const hideTimer = setTimeout(() => setShowAutoPopup(false), 14000);
+    return () => {
+      clearTimeout(showTimer);
+      clearTimeout(hideTimer);
+    };
+  }, [open, popupDismissed]);
 
   const scrollToBottom = useCallback(() => {
     setTimeout(
@@ -622,102 +701,350 @@ function ChatbotWidget() {
         .map((m) => m.text.toLowerCase())
         .join(" ");
 
-      const hasAskedBusiness = prevBotMsgs.includes("business name");
-      const hasAskedProblem = prevBotMsgs.includes("main problem");
-      const hasAskedTools = prevBotMsgs.includes("tools or platforms");
-      const hasAskedBudget = prevBotMsgs.includes("budget");
+      // Context tracking
+      const mentionedAIAgent =
+        prevUserMsgs.includes("ai agent") || prevUserMsgs.includes("agent");
+      const mentionedWebsite =
+        prevUserMsgs.includes("website") || prevUserMsgs.includes("web");
+      const mentionedAutomation =
+        prevUserMsgs.includes("automation") ||
+        prevUserMsgs.includes("automate") ||
+        prevUserMsgs.includes("workflow");
+      const _mentionedSoftware =
+        prevUserMsgs.includes("software") ||
+        prevUserMsgs.includes("app") ||
+        prevUserMsgs.includes("dashboard");
+      const hasAskedBusiness =
+        prevBotMsgs.includes("business type") ||
+        prevBotMsgs.includes("business are you");
+      const hasAskedFeatures =
+        prevBotMsgs.includes("features") ||
+        prevBotMsgs.includes("what features");
+      const hasAskedPlatform =
+        prevBotMsgs.includes("platform") || prevBotMsgs.includes("whatsapp");
+      const hasAskedScale =
+        prevBotMsgs.includes("scale") ||
+        prevBotMsgs.includes("how big") ||
+        prevBotMsgs.includes("users");
+      const hasProvidedDetails = hasAskedBusiness && hasAskedFeatures;
 
-      if (msg.match(/^(hi|hello|hey|assalam|salam|greetings)/)) {
-        return "Hey! Welcome 👋 I'm Haseeb's AI Assistant. Are you looking to automate your business or build AI systems? Tell me what you need!";
+      // Greetings
+      if (
+        msg.match(
+          /^(hi|hello|hey|assalam|salam|greetings|good morning|good evening)/,
+        )
+      ) {
+        return "Hi 👋 I'm Haseeb's AI Assistant. How can I help you today?\n\nWhat type of project are you looking for?\n🤖 AI Agent\n🌐 Website\n⚡ Automation\n💻 Custom Software";
       }
+
+      // Contact / WhatsApp
+      if (msg.includes("whatsapp") || msg.includes("whats app")) {
+        setStage(5);
+        return "You can reach Haseeb directly on WhatsApp at +923415142049. Click below to connect instantly! 👇";
+      }
+      if (
+        msg.includes("contact") ||
+        msg.includes("phone") ||
+        msg.includes("reach") ||
+        msg.includes("number") ||
+        (msg.includes("email") &&
+          !msg.includes("agent") &&
+          !msg.includes("automat"))
+      ) {
+        setStage(5);
+        return "Here's how to reach Haseeb directly:\n📞 +923415142049\n📧 nawazmubshar387@gmail.com\n\nHe usually responds within 1 hour! 🚀";
+      }
+
+      // Services overview
       if (
         msg.includes("service") ||
         msg.includes("what do you do") ||
-        msg.includes("what can you do")
+        msg.includes("what can you build") ||
+        msg.includes("what does haseeb")
       ) {
-        return "Haseeb offers 13+ AI services including:\n🤖 AI Agent Development\n📧 Email Auto-Reply Agents\n🎯 Lead Generation Automation\n🔄 Workflow Automation\n🎙️ Voice AI Agents\n...and more! Which one interests you most?";
+        return "Haseeb builds:\n🤖 AI Agents — custom intelligent agents\n⚡ Automation Systems — n8n, Make.com, Zapier\n🌐 Websites — modern, fast, premium\n💻 Custom Software — dashboards, tools, apps\n\nEven if your need is unique, tell me and I'll guide you! What are you looking for?";
       }
+
+      // AI Agent path
+      if (
+        msg.includes("ai agent") ||
+        msg.includes("agent") ||
+        msg.includes("chatbot") ||
+        msg.includes("chat bot") ||
+        msg.includes("voice agent") ||
+        msg.includes("voice ai")
+      ) {
+        if (!hasAskedBusiness) {
+          return "Great choice! AI agents can transform how your business operates. 🤖\n\nFirst — what type of business are you in? (e.g. e-commerce, real estate, healthcare, SaaS, coaching)";
+        }
+        if (!hasAskedFeatures) {
+          return "What features do you need in your AI agent?\n💬 Customer support (24/7 replies)\n🎯 Lead qualification\n📅 Appointment booking\n🎙️ Voice calls handling\n📦 Inventory / order tracking\n\nWhich ones fit your needs?";
+        }
+        if (!hasAskedPlatform) {
+          return "Which platform should the agent run on?\n🌐 Website / Web App\n📱 WhatsApp\n📸 Instagram DMs\n📧 Email\n☎️ Phone calls\n\nOr multiple platforms?";
+        }
+        if (!hasAskedScale) {
+          return "How big is your expected user scale? Small (under 100/day), Medium (100-1000/day), or Large (1000+ daily interactions)?";
+        }
+        if (hasProvidedDetails) {
+          if (
+            prevUserMsgs.includes("large") ||
+            prevUserMsgs.includes("1000") ||
+            prevUserMsgs.includes("enterprise")
+          ) {
+            setStage(5);
+            return "This sounds like an advanced project! I recommend discussing it directly with Haseeb.\n\n📞 +923415142049\n📧 nawazmubshar387@gmail.com\n\nHe'll give you a custom solution and timeline. 🚀";
+          }
+          if (
+            prevUserMsgs.includes("small") ||
+            prevUserMsgs.includes("simple") ||
+            prevUserMsgs.includes("basic")
+          ) {
+            return "For a basic AI agent, estimated price range is $150–$350. Delivery: 2–4 days.\n\nWould you like to connect with Haseeb directly to get started? You can share your email or WhatsApp number! 📩";
+          }
+          return "For a custom AI agent with those features, estimated range is $300–$800 depending on complexity.\n\nWould you like to connect with Haseeb to discuss the details? Share your email or WhatsApp and he'll reach out! 📩";
+        }
+      }
+
+      // Website path
+      if (
+        msg.includes("website") ||
+        msg.includes("web design") ||
+        msg.includes("landing page") ||
+        msg.includes("portfolio site")
+      ) {
+        if (!hasAskedBusiness) {
+          return "Perfect! A great website can really boost your brand. 🌐\n\nWhat type of business are you in? And what's the main goal — showcase your work, sell products, or generate leads?";
+        }
+        if (!hasAskedFeatures) {
+          return "What features do you need?\n🎨 Custom design & branding\n📱 Mobile responsive\n📧 Contact / lead form\n🛒 E-commerce / payments\n📊 Admin dashboard\n\nAny specific requirements?";
+        }
+        if (hasProvidedDetails) {
+          if (
+            prevUserMsgs.includes("ecommerce") ||
+            prevUserMsgs.includes("e-commerce") ||
+            prevUserMsgs.includes("store") ||
+            prevUserMsgs.includes("payment")
+          ) {
+            setStage(5);
+            return "E-commerce projects are larger in scope. I recommend discussing directly with Haseeb for accurate pricing.\n📞 +923415142049\n📧 nawazmubshar387@gmail.com";
+          }
+          return "For a modern, premium website like yours, estimated range is $200–$600.\n\nReady to get started? Share your email or WhatsApp and Haseeb will reach out! 📩";
+        }
+      }
+
+      // Automation path
+      if (
+        msg.includes("automation") ||
+        msg.includes("automate") ||
+        msg.includes("workflow") ||
+        msg.includes("n8n") ||
+        msg.includes("make.com") ||
+        msg.includes("zapier")
+      ) {
+        if (!hasAskedBusiness) {
+          return "Automation can save you 100+ hours per month! ⚡\n\nWhat type of business are you in, and which process do you want to automate first?";
+        }
+        if (!hasAskedFeatures) {
+          return "What tasks are you looking to automate?\n📧 Email follow-ups & replies\n🎯 Lead capture & CRM updates\n📊 Report generation\n📦 Inventory / order sync\n🔔 Alerts & notifications\n\nTell me more!";
+        }
+        if (!hasAskedScale) {
+          return "How complex is your workflow? Simple (1-3 steps), Medium (4-10 steps), or Complex (10+ steps with logic)?";
+        }
+        if (hasProvidedDetails) {
+          if (
+            prevUserMsgs.includes("complex") ||
+            prevUserMsgs.includes("10+") ||
+            prevUserMsgs.includes("enterprise") ||
+            prevUserMsgs.includes("large")
+          ) {
+            setStage(5);
+            return "Complex automation projects need a custom approach. Let Haseeb assess it directly:\n📞 +923415142049\n📧 nawazmubshar387@gmail.com 🚀";
+          }
+          if (
+            prevUserMsgs.includes("simple") ||
+            prevUserMsgs.includes("1-3") ||
+            prevUserMsgs.includes("small")
+          ) {
+            return "Simple automation workflows are priced at $100–$250. Delivery: 1–3 days. ✅\n\nWant to connect with Haseeb to get started? Share your contact details! 📩";
+          }
+          return "For a medium automation system, estimated range is $250–$600. Delivery: 3–7 days.\n\nWould you like to connect with Haseeb directly? Share your email or WhatsApp! 📩";
+        }
+      }
+
+      // Custom software path
+      if (
+        msg.includes("software") ||
+        msg.includes("dashboard") ||
+        msg.includes("custom app") ||
+        msg.includes("inventory") ||
+        msg.includes("crm") ||
+        msg.includes("system")
+      ) {
+        if (!hasAskedBusiness) {
+          return "Custom software can be a real game-changer! 💻\n\nWhat type of business are you in, and what problem should this software solve?";
+        }
+        if (!hasAskedFeatures) {
+          return "What key features do you need?\n📊 Dashboard & analytics\n👥 User management\n🔔 Alerts & reports\n📦 Inventory tracking\n🔗 API integrations\n\nAny other requirements?";
+        }
+        if (!hasAskedScale) {
+          return "How many users will use this system? Solo, small team (2-10), or larger organization (10+)?";
+        }
+        if (hasProvidedDetails) {
+          if (
+            prevUserMsgs.includes("10+") ||
+            prevUserMsgs.includes("large") ||
+            prevUserMsgs.includes("organization") ||
+            prevUserMsgs.includes("enterprise")
+          ) {
+            setStage(5);
+            return "This looks like an advanced project. Haseeb should assess it directly to give you the best solution:\n📞 +923415142049\n📧 nawazmubshar387@gmail.com";
+          }
+          return "For a custom software solution, estimated range is $400–$1200 depending on complexity.\n\nThis project looks advanced — I recommend discussing directly with Haseeb.\n📞 +923415142049\n📧 nawazmubshar387@gmail.com 🚀";
+        }
+      }
+
+      // Pricing questions
       if (
         msg.includes("price") ||
         msg.includes("cost") ||
         msg.includes("rate") ||
         msg.includes("charge") ||
-        msg.includes("how much")
+        msg.includes("how much") ||
+        msg.includes("budget")
       ) {
-        return "Pricing depends on the project scope and complexity. To give you an accurate quote, can I ask — what's your business type and what process do you want to automate?";
+        if (mentionedAIAgent)
+          return "For AI agents, pricing typically ranges:\n🟢 Basic: $150–$350\n🟡 Standard: $350–$800\n🔴 Advanced: Custom quote\n\nTo give you an accurate quote, what's your business type and what should the agent do?";
+        if (mentionedAutomation)
+          return "Automation pricing ranges:\n🟢 Simple: $100–$250\n🟡 Medium: $250–$600\n🔴 Complex: Custom quote\n\nWhat process are you automating?";
+        if (mentionedWebsite)
+          return "Website pricing ranges:\n🟢 Basic: $200–$400\n🟡 Premium: $400–$800\n🔴 E-commerce: Custom quote\n\nWhat type of website do you need?";
+        return "Pricing depends on what you're building. Could you tell me:\n1. What type of project? (AI Agent / Website / Automation / Software)\n2. Your business type?\n\nThen I can give you a better estimate!";
       }
-      if (
-        msg.includes("n8n") ||
-        msg.includes("make.com") ||
-        msg.includes("zapier")
-      ) {
-        return "Yes! Haseeb works with n8n, Make.com, and similar automation platforms. He can build complex multi-step workflows. What process are you looking to automate?";
-      }
+
+      // Timeline
       if (
         msg.includes("how long") ||
         msg.includes("timeline") ||
+        msg.includes("delivery") ||
         (msg.includes("time") && msg.includes("take"))
       ) {
-        return "Most automation projects take 3-7 days depending on complexity. Simple automations can be done in 1-2 days. What are you trying to build?";
+        return "Typical timelines:\n⚡ Simple automations: 1–3 days\n🤖 AI agents: 3–7 days\n🌐 Websites: 3–7 days\n💻 Custom software: 1–4 weeks\n\nWhat are you planning to build?";
       }
+
+      // Lead generation
+      if (msg.includes("lead") || msg.includes("leads")) {
+        return "Lead generation is one of Haseeb's strongest services! 🎯\n\nHe can build systems that:\n✅ Auto-capture leads from forms/DMs\n✅ Qualify them with AI\n✅ Auto-send personalized follow-ups\n✅ Update your CRM automatically\n\nWhat's your current lead source?";
+      }
+
+      // Voice AI
       if (
-        msg.includes("contact") ||
-        msg.includes("phone") ||
-        msg.includes("email") ||
-        msg.includes("reach") ||
-        msg.includes("number")
+        msg.includes("voice") ||
+        msg.includes("phone call") ||
+        msg.includes("phone bot")
       ) {
-        setStage(5);
-        return "Here's how to reach Haseeb directly:\n📞 +923415142049\n📧 nawazmubshar387@gmail.com\n\nHe usually responds within 1 hour! 🚀";
+        return "Voice AI agents are perfect for businesses that get many calls! 🎙️\n\nCapabilities:\n📞 Answer & qualify inbound calls\n🗓️ Book appointments automatically\n❓ Handle FAQs without human staff\n\nWhat industry is your business in?";
       }
-      if (msg.includes("whatsapp") || msg.includes("whats app")) {
-        setStage(5);
-        return "You can WhatsApp Haseeb directly at +923415142049 — click the button below to connect instantly!";
-      }
-      if (msg.includes("chatbot") || msg.includes("chat bot")) {
-        return "Haseeb builds AI chatbots that handle customer queries 24/7, qualify leads, book appointments, and integrate with your CRM. What platform are you on? (Website, WhatsApp, Instagram?)";
-      }
-      if (msg.includes("voice") || msg.includes("phone bot")) {
-        return "Haseeb builds Voice AI agents that handle calls, answer questions, and qualify leads automatically — perfect for businesses getting many calls. Want to know more?";
-      }
-      if (msg.includes("lead") || msg.includes("sales")) {
-        return "Haseeb has built lead gen systems that 5x'd client leads! He can automate lead capture, qualification, follow-up, and CRM updates. What's your current lead source?";
-      }
-      if (
-        msg.includes("book") ||
-        msg.includes("appointment") ||
-        msg.includes("calendar") ||
-        msg.includes("schedule")
-      ) {
-        return "Haseeb can automate your entire booking flow — from form submission to calendar invite to confirmation email. Which booking platform do you use?";
-      }
+
+      // Experience / portfolio
       if (
         msg.includes("experience") ||
         msg.includes("portfolio") ||
         msg.includes("previous work") ||
         msg.includes("project")
       ) {
-        return "Haseeb has 1+ year hands-on experience and has built:\n📧 Email AI Agents\n📦 Inventory AI Systems\n🎯 Lead Gen Automation\n🎙️ Voice Support AI\n...for real businesses! Check the Projects section above.";
+        return "Haseeb has 1+ year hands-on experience and has delivered:\n📧 Email AI Agents\n📦 Inventory Management AI\n🎯 Lead Gen Automation Systems\n🎙️ Voice Support AI Agents\n🌐 Premium Websites\n\nAll for real businesses! Check the Projects section on this page. 👆";
       }
-      if (!hasAskedBusiness && prevUserMsgs.length > 5) {
-        return "That sounds interesting! Could you tell me your business name so I can better understand your needs?";
+
+      // Lead capture moment — after some back-and-forth
+      const userMsgCount = history.filter((m) => m.role === "user").length;
+      if (userMsgCount >= 3 && !prevBotMsgs.includes("share your email")) {
+        return "I can see you're serious about this! 💡 Would you like to connect with Haseeb directly? Just share your email or WhatsApp number and he'll get back to you fast — usually within 1 hour.";
       }
-      if (hasAskedBusiness && !hasAskedProblem) {
-        return "Great! What's the main problem you're trying to solve — repetitive tasks, slow responses, missing leads, something else?";
-      }
-      if (hasAskedProblem && !hasAskedTools) {
-        return "Got it! What tools or platforms are you currently using? (e.g. email software, CRM, website platform)";
-      }
-      if (hasAskedTools && !hasAskedBudget) {
-        return "Perfect. Do you have a rough budget in mind for this automation project?";
-      }
-      if (hasAskedBudget) {
-        setStage(5);
-        return "Thanks for sharing all that! Haseeb can definitely help. Contact him directly:\n📞 +923415142049\n📧 nawazmubshar387@gmail.com";
-      }
-      return "I can help with that! Haseeb specializes in AI automation and agent development. Could you tell me a bit more about your business and what you're looking to automate?";
+
+      // Default fallback
+      return "That's a great question! Haseeb specializes in AI agents, automation, websites, and custom software.\n\nTo suggest the best solution for you — what type of project are you working on?\n🤖 AI Agent\n🌐 Website\n⚡ Automation\n💻 Custom Software\n\nEven if your need is unique, just tell me and I'll guide you!";
     },
     [],
+  );
+
+  const WEBHOOK_URL = "https://hook.eu2.make.com/YOUR_WEBHOOK_ID";
+
+  const logConversation = useCallback((userMsg: string, botReply: string) => {
+    const payload = {
+      user_message: userMsg,
+      assistant_reply: botReply,
+      time: new Date().toISOString(),
+      page: "Haseeb Portfolio",
+    };
+    fetch(WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }).catch(() => {});
+  }, []);
+
+  const handleImageUpload = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const name = file.name.toLowerCase();
+      const isDashboard =
+        name.includes("dashboard") ||
+        name.includes("dash") ||
+        name.includes("admin");
+      const isScreenshot =
+        name.includes("screen") || name.includes("screenshot");
+      const isLogo = name.includes("logo") || name.includes("brand");
+      const isWorkflow =
+        name.includes("flow") ||
+        name.includes("workflow") ||
+        name.includes("diagram");
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          role: "user",
+          text: `📎 [Image: ${file.name}]`,
+          time: now(),
+        },
+      ]);
+      setIsTyping(true);
+
+      let response = "";
+      if (isDashboard) {
+        response =
+          "I can see you've shared what looks like a dashboard or admin panel. 📊\n\nI can see data visualization elements, navigation menus, and analytics widgets. Based on this, Haseeb can:\n✅ Build a custom version with AI-powered insights\n✅ Add automation to auto-populate data\n✅ Connect it to your existing tools via API\n\nWhat specific improvements are you looking for in this dashboard?";
+      } else if (isScreenshot) {
+        response =
+          "I can see you've shared a screenshot. 🖥️\n\nBased on the interface shown, I can help suggest:\n✅ How to automate this workflow\n✅ Which AI tools can improve it\n✅ What features could save you time\n\nWhat task are you trying to automate or improve here?";
+      } else if (isLogo) {
+        response =
+          "I can see you've shared a logo or brand asset. 🎨\n\nHaseeb can build a fully branded AI assistant or website that perfectly matches your brand identity.\n\nIs this for a new website, AI chatbot, or automation system?";
+      } else if (isWorkflow) {
+        response =
+          "I can see you've shared a workflow or process diagram. 🔄\n\nThis looks like exactly the kind of process Haseeb specializes in automating! He can:\n✅ Map your current manual steps\n✅ Identify automation opportunities\n✅ Build an n8n/Make.com workflow that runs it automatically\n\nHow many steps are currently manual in this workflow?";
+      } else {
+        response = `I've received your image (${file.name}). 🖼️\n\nTo give you the best recommendation, can you tell me:\n1. What does this image represent? (e.g. your current workflow, a UI mockup, your business process)\n2. What would you like to automate or improve?\n\nHaseeb can build AI solutions tailored exactly to what you're showing me!`;
+      }
+
+      setTimeout(() => {
+        setIsTyping(false);
+        const botMsg = {
+          id: Date.now() + 1,
+          role: "bot" as const,
+          text: response,
+          time: now(),
+        };
+        setMessages((prev) => [...prev, botMsg]);
+        scrollToBottom();
+        logConversation(`[Image Upload: ${file.name}]`, response);
+      }, 1500);
+
+      if (e.target) e.target.value = "";
+    },
+    [scrollToBottom, logConversation],
   );
 
   const handleSend = useCallback(() => {
@@ -725,9 +1052,14 @@ function ChatbotWidget() {
     if (!text) return;
     addUser(text);
     setInput("");
+    setIsTyping(true);
     const response = getSmartResponse(text, messages);
-    setTimeout(() => addBot(response), 600);
-  }, [input, messages, addUser, addBot, getSmartResponse]);
+    setTimeout(() => {
+      setIsTyping(false);
+      addBot(response);
+      logConversation(text, response);
+    }, 1200);
+  }, [input, messages, addUser, addBot, getSmartResponse, logConversation]);
 
   const handleQuickReply = useCallback(
     (type: string) => {
@@ -765,34 +1097,247 @@ function ChatbotWidget() {
     [addUser, addBot],
   );
 
+  const handleMic = useCallback(() => {
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      addBot(
+        "Voice input is not supported in your browser. Please type your message instead.",
+      );
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    setListening(true);
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setInput(transcript);
+      setListening(false);
+    };
+    recognition.onerror = () => setListening(false);
+    recognition.onend = () => setListening(false);
+    recognition.start();
+  }, [addBot]);
+
+  const handleToggle = useCallback(() => {
+    setOpen((o) => !o);
+    if (!open) setHasNotification(false);
+  }, [open]);
+
   return (
     <>
+      {/* Auto-engagement popup */}
+      {showAutoPopup && !open && !popupDismissed && (
+        <div
+          style={{
+            position: "fixed" as const,
+            bottom: "100px",
+            right: "24px",
+            zIndex: 1002,
+            maxWidth: "220px",
+            animation: "chatbot-slide-up 0.3s ease forwards",
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => {
+              setShowAutoPopup(false);
+              setPopupDismissed(true);
+              setOpen(true);
+              setHasNotification(false);
+            }}
+            style={{
+              width: "100%",
+              background:
+                "linear-gradient(135deg, rgba(15,15,30,0.98), rgba(20,10,40,0.98))",
+              border: "1px solid rgba(124,58,237,0.7)",
+              borderRadius: "16px",
+              padding: "14px 18px",
+              color: "#e8eaf6",
+              fontSize: "0.88rem",
+              fontFamily: "DM Sans, sans-serif",
+              boxShadow: "0 8px 32px rgba(124,58,237,0.35)",
+              cursor: "pointer",
+              textAlign: "left" as const,
+              position: "relative" as const,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                gap: "8px",
+              }}
+            >
+              <span>Hi 👋 Need help with your project?</span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowAutoPopup(false);
+                  setPopupDismissed(true);
+                }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "rgba(255,255,255,0.4)",
+                  fontSize: "0.8rem",
+                  flexShrink: 0,
+                  cursor: "pointer",
+                  lineHeight: 1,
+                  padding: 0,
+                }}
+              >
+                ✕
+              </button>
+            </div>
+            <div
+              style={{
+                marginTop: "8px",
+                fontSize: "0.75rem",
+                color: "#9b5de5",
+              }}
+            >
+              Click to chat →
+            </div>
+            <div
+              style={{
+                position: "absolute" as const,
+                bottom: "-8px",
+                right: "28px",
+                width: 0,
+                height: 0,
+                borderLeft: "8px solid transparent",
+                borderRight: "8px solid transparent",
+                borderTop: "8px solid rgba(124,58,237,0.7)",
+              }}
+            />
+          </button>
+        </div>
+      )}
+
+      {/* Tooltip */}
+      {(showTooltip || hovered) && !open && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: "40px",
+            right: "100px",
+            zIndex: 1001,
+            background: "rgba(15,15,30,0.95)",
+            border: "1px solid rgba(124,58,237,0.6)",
+            borderRadius: "12px",
+            padding: "8px 14px",
+            color: "#e8eaf6",
+            fontSize: "0.82rem",
+            fontFamily: "DM Sans, sans-serif",
+            whiteSpace: "nowrap",
+            animation: "chatbot-tooltip-in 0.25s ease forwards",
+            boxShadow: "0 4px 20px rgba(124,58,237,0.25)",
+            pointerEvents: "none",
+          }}
+        >
+          Chat with me 👋{/* Arrow pointing right */}
+          <span
+            style={{
+              position: "absolute",
+              right: "-7px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: 0,
+              height: 0,
+              borderTop: "6px solid transparent",
+              borderBottom: "6px solid transparent",
+              borderLeft: "7px solid rgba(15,15,30,0.95)",
+            }}
+          />
+        </div>
+      )}
+
+      {/* Glow ring behind button */}
+      {!open && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: "9px",
+            right: "9px",
+            zIndex: 999,
+            width: "110px",
+            height: "110px",
+            borderRadius: "50%",
+            background:
+              "radial-gradient(circle, rgba(124,58,237,0.4) 0%, rgba(79,111,255,0.15) 50%, transparent 70%)",
+            animation: "chatbot-glow-ring 2s ease-in-out infinite",
+            pointerEvents: "none",
+          }}
+        />
+      )}
+
       {/* Toggle button */}
       <button
         type="button"
         data-ocid="chatbot.toggle"
-        onClick={() => setOpen((o) => !o)}
+        onClick={handleToggle}
+        onMouseEnter={() => {
+          setHovered(true);
+        }}
+        onMouseLeave={() => {
+          setHovered(false);
+        }}
         style={{
           position: "fixed",
-          bottom: "28px",
-          right: "28px",
-          zIndex: 900,
-          width: "60px",
-          height: "60px",
+          bottom: "24px",
+          right: "24px",
+          zIndex: 1000,
+          width: "64px",
+          height: "64px",
           borderRadius: "50%",
-          background: "linear-gradient(135deg, #4f6fff, #9b5de5)",
+          background: open
+            ? "linear-gradient(135deg, #ef4444, #7C3AED)"
+            : "linear-gradient(135deg, #4f6fff, #9b5de5)",
           border: "none",
           cursor: "pointer",
-          fontSize: "1.6rem",
-          boxShadow: "0 0 30px rgba(79,111,255,0.6)",
+          fontSize: open ? "1.2rem" : "1.8rem",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          transition: "transform 0.3s",
+          transition:
+            "transform 0.3s cubic-bezier(0.34,1.56,0.64,1), background 0.4s, box-shadow 0.3s",
+          animation: open
+            ? "none"
+            : hovered
+              ? "chatbot-bounce 0.5s ease forwards"
+              : "chatbot-float 3.5s ease-in-out infinite, chatbot-pulse-ring 2.8s ease-in-out infinite, chatbot-auto-bounce 5s ease-in-out infinite",
+          boxShadow: hovered
+            ? "0 0 40px rgba(124,58,237,0.8), 0 8px 32px rgba(0,0,0,0.4)"
+            : "0 0 20px rgba(79,111,255,0.4), 0 4px 20px rgba(0,0,0,0.3)",
+          transform: hovered ? "scale(1.12)" : "scale(1)",
         }}
       >
         {open ? "✕" : "🤖"}
       </button>
+
+      {/* Notification dot */}
+      {hasNotification && !open && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: "72px",
+            right: "22px",
+            zIndex: 1001,
+            width: "14px",
+            height: "14px",
+            borderRadius: "50%",
+            background: "linear-gradient(135deg, #ef4444, #f97316)",
+            border: "2px solid #0B0F19",
+            animation: "chatbot-notif-pulse 2s ease-in-out infinite",
+            pointerEvents: "none",
+          }}
+        />
+      )}
 
       {/* Chat window */}
       {open && (
@@ -800,19 +1345,21 @@ function ChatbotWidget() {
           data-ocid="chatbot.panel"
           style={{
             position: "fixed",
-            bottom: "100px",
-            right: "28px",
-            zIndex: 900,
-            width: "min(380px, calc(100vw - 40px))",
-            height: "520px",
-            background: "#0B0F19",
-            border: "1px solid rgba(124,58,237,0.3)",
-            borderRadius: "20px",
+            bottom: "104px",
+            right: "24px",
+            zIndex: 1000,
+            width: "min(390px, calc(100vw - 36px))",
+            height: "min(560px, calc(100vh - 140px))",
+            background: "linear-gradient(180deg, #0e1120 0%, #0B0F19 100%)",
+            border: "1px solid rgba(124,58,237,0.35)",
+            borderRadius: "24px",
             boxShadow:
-              "0 20px 60px rgba(0,0,0,0.6), 0 0 30px rgba(124,58,237,0.15)",
+              "0 24px 80px rgba(0,0,0,0.7), 0 0 40px rgba(124,58,237,0.18)",
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
+            animation:
+              "chatbot-slide-up 0.35s cubic-bezier(0.22,1,0.36,1) forwards",
           }}
         >
           {/* Header */}
@@ -828,50 +1375,80 @@ function ChatbotWidget() {
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "10px",
+                justifyContent: "space-between",
                 marginBottom: "10px",
               }}
             >
-              <div style={{ position: "relative" }}>
-                <img
-                  src={PROFILE_IMG}
-                  alt="Haseeb"
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    borderRadius: "50%",
-                    objectFit: "cover",
-                  }}
-                />
-                <span
-                  style={{
-                    position: "absolute",
-                    bottom: 0,
-                    right: 0,
-                    width: "10px",
-                    height: "10px",
-                    background: "#00c853",
-                    borderRadius: "50%",
-                    border: "2px solid #0B0F19",
-                  }}
-                />
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "10px" }}
+              >
+                <div style={{ position: "relative" }}>
+                  <img
+                    src={PROFILE_IMG}
+                    alt="Haseeb"
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                      objectPosition: "center center",
+                    }}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      bottom: 0,
+                      right: 0,
+                      width: "10px",
+                      height: "10px",
+                      background: "#00c853",
+                      borderRadius: "50%",
+                      border: "2px solid #0B0F19",
+                    }}
+                  />
+                </div>
+                <div>
+                  <p
+                    style={{
+                      fontFamily: "Syne, sans-serif",
+                      fontWeight: 700,
+                      color: "#fff",
+                      fontSize: "0.9rem",
+                      margin: 0,
+                    }}
+                  >
+                    Haseeb&apos;s AI Assistant
+                  </p>
+                  <p
+                    style={{ color: "#00c853", fontSize: "0.75rem", margin: 0 }}
+                  >
+                    ● Online
+                  </p>
+                </div>
               </div>
-              <div>
-                <p
-                  style={{
-                    fontFamily: "Syne, sans-serif",
-                    fontWeight: 700,
-                    color: "#fff",
-                    fontSize: "0.9rem",
-                    margin: 0,
-                  }}
-                >
-                  Haseeb&apos;s AI Assistant
-                </p>
-                <p style={{ color: "#00c853", fontSize: "0.75rem", margin: 0 }}>
-                  ● Online
-                </p>
-              </div>
+              {/* Close button */}
+              <button
+                type="button"
+                data-ocid="chatbot.close_button"
+                onClick={handleToggle}
+                style={{
+                  background: "rgba(255,255,255,0.08)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: "8px",
+                  color: "rgba(255,255,255,0.6)",
+                  width: "28px",
+                  height: "28px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  fontSize: "0.85rem",
+                  transition: "all 0.2s",
+                  flexShrink: 0,
+                }}
+              >
+                ✕
+              </button>
             </div>
             {/* Quick buttons */}
             <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
@@ -980,18 +1557,111 @@ function ChatbotWidget() {
                 </div>
               </div>
             ))}
+
+            {/* Typing indicator */}
+            {isTyping && (
+              <div style={{ display: "flex", justifyContent: "flex-start" }}>
+                <div
+                  data-ocid="chatbot.loading_state"
+                  style={{
+                    background: "rgba(255,255,255,0.06)",
+                    borderRadius: "16px 16px 16px 4px",
+                    padding: "12px 16px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                  }}
+                >
+                  {[0, 1, 2].map((i) => (
+                    <span
+                      key={i}
+                      style={{
+                        display: "inline-block",
+                        width: "7px",
+                        height: "7px",
+                        borderRadius: "50%",
+                        background: "linear-gradient(135deg, #9b5de5, #4f6fff)",
+                        animation: `chatbot-typing-dot 1.2s ease-in-out ${i * 0.16}s infinite`,
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div ref={bottomRef} />
           </div>
 
-          {/* Input */}
+          {/* Input area */}
           <div
             style={{
               padding: "12px",
               borderTop: "1px solid rgba(124,58,237,0.2)",
               display: "flex",
               gap: "8px",
+              alignItems: "center",
             }}
           >
+            {/* Hidden file input for image upload */}
+            <input
+              ref={imageInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={handleImageUpload}
+            />
+            {/* Image upload button */}
+            <button
+              type="button"
+              data-ocid="chatbot.image_upload"
+              onClick={() => imageInputRef.current?.click()}
+              style={{
+                width: "38px",
+                height: "38px",
+                borderRadius: "50%",
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(79,111,255,0.3)",
+                cursor: "pointer",
+                fontSize: "1rem",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                transition: "all 0.2s",
+              }}
+            >
+              📎
+            </button>
+            {/* Microphone button */}
+            <button
+              type="button"
+              data-ocid="chatbot.toggle"
+              onClick={handleMic}
+              style={{
+                width: "38px",
+                height: "38px",
+                borderRadius: "50%",
+                background: listening
+                  ? "rgba(239,68,68,0.2)"
+                  : "rgba(255,255,255,0.05)",
+                border: listening
+                  ? "1px solid rgba(239,68,68,0.5)"
+                  : "1px solid rgba(124,58,237,0.3)",
+                cursor: "pointer",
+                fontSize: "1rem",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                transition: "all 0.2s",
+                animation: listening
+                  ? "chatbot-mic-pulse 1s ease-in-out infinite"
+                  : "none",
+              }}
+            >
+              🎤
+            </button>
+
             <input
               data-ocid="chatbot.input"
               value={input}
@@ -1022,6 +1692,7 @@ function ChatbotWidget() {
                 color: "#fff",
                 cursor: "pointer",
                 fontSize: "1rem",
+                flexShrink: 0,
               }}
             >
               ➤
@@ -2182,7 +2853,7 @@ export default function App() {
                 height: "280px",
                 borderRadius: "50%",
                 objectFit: "cover",
-                objectPosition: "center top",
+                objectPosition: "center center",
                 position: "relative",
                 zIndex: 1,
                 display: "block",
@@ -2344,6 +3015,7 @@ export default function App() {
       {/* ── AI UNIVERSE ── */}
       <AIUniverseAnimation />
 
+      <hr className="section-divider" />
       {/* ── STATS ── */}
       <section
         style={{
@@ -2422,6 +3094,7 @@ export default function App() {
         </div>
       </section>
 
+      <hr className="section-divider" />
       {/* ── EXPERTISE STRIP ── */}
       <section
         data-reveal
@@ -2599,6 +3272,7 @@ export default function App() {
         </div>
       </section>
 
+      <hr className="section-divider" />
       {/* ── ABOUT ── */}
       <section
         id="about"
@@ -2608,6 +3282,7 @@ export default function App() {
           background: "#04050a",
         }}
       >
+        <div className="section-badge">Who I Am</div>
         <h2
           style={{
             fontFamily: "Syne, sans-serif",
@@ -2633,6 +3308,22 @@ export default function App() {
         >
           {/* Bio */}
           <div>
+            <div className="about-quote-block">
+              <p
+                style={{
+                  color: "#e2e8f0",
+                  fontStyle: "italic",
+                  fontSize: "1rem",
+                  lineHeight: 1.8,
+                  margin: 0,
+                  fontFamily: "DM Sans,sans-serif",
+                }}
+              >
+                "I'm Haseeb Nawaz — Agentic AI Engineer & Automation Builder
+                from Lahore. I build intelligent systems that save time and
+                scale businesses."
+              </p>
+            </div>
             <p
               style={{
                 color: "#d1d5db",
@@ -2745,6 +3436,7 @@ My focus is on creating Agentic AI solutions — systems that can think, decide,
         </div>
       </section>
 
+      <hr className="section-divider" />
       {/* ── SERVICES ── */}
       <section
         id="services"
@@ -2755,6 +3447,7 @@ My focus is on creating Agentic AI solutions — systems that can think, decide,
         }}
       >
         <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+          <div className="section-badge purple">What I Build</div>
           <h2
             style={{
               fontFamily: "Syne, sans-serif",
@@ -2785,14 +3478,28 @@ My focus is on creating Agentic AI solutions — systems that can think, decide,
             <div
               key={s.title}
               data-ocid={`services.item.${i + 1}`}
-              className="service-card"
+              className="service-card premium-card"
               style={{
-                background: "rgba(255,255,255,0.03)",
-                border: "1px solid rgba(79,111,255,0.2)",
                 borderRadius: "16px",
                 padding: "1.75rem",
+                position: "relative",
+                overflow: "hidden",
               }}
             >
+              <span
+                style={{
+                  position: "absolute",
+                  top: "1rem",
+                  right: "1rem",
+                  fontSize: "0.7rem",
+                  fontWeight: 800,
+                  color: "rgba(79,111,255,0.4)",
+                  fontFamily: "Syne,sans-serif",
+                  letterSpacing: "0.05em",
+                }}
+              >
+                {String(i + 1).padStart(2, "0")}
+              </span>
               <div style={{ fontSize: "2rem", marginBottom: "0.75rem" }}>
                 {s.icon}
               </div>
@@ -2821,6 +3528,7 @@ My focus is on creating Agentic AI solutions — systems that can think, decide,
         </div>
       </section>
 
+      <hr className="section-divider" />
       {/* ── PROJECTS ── */}
       <section
         id="projects"
@@ -2831,6 +3539,7 @@ My focus is on creating Agentic AI solutions — systems that can think, decide,
         }}
       >
         <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+          <div className="section-badge cyan">Live Work</div>
           <h2
             style={{
               fontFamily: "Syne, sans-serif",
@@ -2861,14 +3570,13 @@ My focus is on creating Agentic AI solutions — systems that can think, decide,
             <div
               key={p.title}
               data-ocid={`projects.item.${i + 1}`}
-              className="service-card"
+              className="service-card premium-card"
               style={{
-                background: "rgba(255,255,255,0.03)",
-                border: "1px solid rgba(79,111,255,0.2)",
                 borderRadius: "16px",
                 padding: "2rem",
                 position: "relative",
                 overflow: "hidden",
+                borderLeft: `3px solid ${p.tagColor}`,
               }}
             >
               <span
@@ -2908,6 +3616,7 @@ My focus is on creating Agentic AI solutions — systems that can think, decide,
         </div>
       </section>
 
+      <hr className="section-divider" />
       {/* ── CERTIFICATIONS ── */}
       <section
         id="certifications"
@@ -2918,6 +3627,7 @@ My focus is on creating Agentic AI solutions — systems that can think, decide,
         }}
       >
         <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+          <div className="section-badge green">Credentials</div>
           <h2
             style={{
               fontFamily: "Syne, sans-serif",
@@ -2948,10 +3658,8 @@ My focus is on creating Agentic AI solutions — systems that can think, decide,
             <div
               key={c.name}
               data-ocid={`certifications.item.${i + 1}`}
-              className="service-card cert-card-anim"
+              className="service-card cert-card-anim premium-card"
               style={{
-                background: "rgba(255,255,255,0.03)",
-                border: "1px solid rgba(155,93,229,0.2)",
                 borderRadius: "14px",
                 padding: "1.5rem 1rem",
                 textAlign: "center",
@@ -2972,20 +3680,27 @@ My focus is on creating Agentic AI solutions — systems that can think, decide,
               >
                 {c.name}
               </p>
-              <p
+              <span
                 style={{
-                  color: "#9b5de5",
-                  fontSize: "0.72rem",
-                  fontFamily: "DM Sans, sans-serif",
+                  display: "inline-block",
+                  background: "rgba(155,93,229,0.15)",
+                  border: "1px solid rgba(155,93,229,0.3)",
+                  borderRadius: "100px",
+                  padding: "2px 10px",
+                  fontSize: "0.68rem",
+                  color: "#c4b5fd",
+                  fontFamily: "DM Sans,sans-serif",
+                  fontWeight: 600,
                 }}
               >
                 {c.issuer}
-              </p>
+              </span>
             </div>
           ))}
         </div>
       </section>
 
+      <hr className="section-divider" />
       {/* ── WHY CHOOSE ME ── */}
       <section
         style={{
@@ -2994,6 +3709,7 @@ My focus is on creating Agentic AI solutions — systems that can think, decide,
         }}
       >
         <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+          <div className="section-badge purple">Why Haseeb</div>
           <h2
             style={{
               fontFamily: "Syne, sans-serif",
@@ -3023,10 +3739,8 @@ My focus is on creating Agentic AI solutions — systems that can think, decide,
           {WHY.map((w) => (
             <div
               key={w.title}
-              className="service-card"
+              className="service-card premium-card"
               style={{
-                background: "rgba(255,255,255,0.03)",
-                border: "1px solid rgba(79,111,255,0.2)",
                 borderRadius: "16px",
                 padding: "2rem 1.25rem",
                 textAlign: "center",
@@ -3061,6 +3775,7 @@ My focus is on creating Agentic AI solutions — systems that can think, decide,
         </div>
       </section>
 
+      <hr className="section-divider" />
       {/* ── SOCIAL LINKS ── */}
       <section
         style={{
@@ -3069,6 +3784,7 @@ My focus is on creating Agentic AI solutions — systems that can think, decide,
           textAlign: "center",
         }}
       >
+        <div className="section-badge cyan">Let's Connect</div>
         <h2
           style={{
             fontFamily: "Syne, sans-serif",
@@ -3193,6 +3909,7 @@ My focus is on creating Agentic AI solutions — systems that can think, decide,
         </div>
       </section>
 
+      <hr className="section-divider" />
       {/* ── FAQs ── */}
       <section
         id="faqs"
@@ -3202,6 +3919,7 @@ My focus is on creating Agentic AI solutions — systems that can think, decide,
         }}
       >
         <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+          <div className="section-badge">Questions</div>
           <h2
             style={{
               fontFamily: "Syne, sans-serif",
@@ -3391,8 +4109,9 @@ My focus is on creating Agentic AI solutions — systems that can think, decide,
       {/* ── FOOTER ── */}
       <footer
         style={{
-          background: "#04050a",
-          borderTop: "1px solid rgba(79,111,255,0.12)",
+          background:
+            "linear-gradient(180deg, rgba(79,111,255,0.04) 0%, #04050a 100%)",
+          borderTop: "1px solid rgba(79,111,255,0.15)",
           padding: "2.5rem max(1.5rem, calc((100vw - 1200px)/2))",
         }}
       >
