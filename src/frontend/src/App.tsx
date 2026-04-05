@@ -1390,8 +1390,9 @@ function ChatbotWidget() {
                       width: "40px",
                       height: "40px",
                       borderRadius: "50%",
-                      objectFit: "cover",
+                      objectFit: "contain",
                       objectPosition: "center center",
+                      transform: "scale(0.9)",
                     }}
                   />
                   <span
@@ -2852,11 +2853,13 @@ export default function App() {
                 width: "280px",
                 height: "280px",
                 borderRadius: "50%",
-                objectFit: "cover",
+                objectFit: "contain",
                 objectPosition: "center center",
                 position: "relative",
                 zIndex: 1,
                 display: "block",
+                transform: "scale(0.9)",
+                background: "transparent",
               }}
             />
             {/* Online dot */}
