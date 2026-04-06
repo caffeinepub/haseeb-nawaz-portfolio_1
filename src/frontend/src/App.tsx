@@ -221,13 +221,19 @@ const CERTS: CertEntry[] = [
     certificateImage:
       "/assets/ibm_ai_foundations-019d6160-1f57-768e-9a4c-c86af5ec8486.png",
   },
-  { icon: "📊", name: "IBM Machine Learning", issuer: "IBM" },
+  {
+    icon: "📊",
+    name: "IBM Machine Learning",
+    issuer: "IBM",
+    certificateImage:
+      "/assets/machine_learing_in_ai-019d6171-b3a4-7749-a6c0-d04cd05abc25.png",
+  },
   {
     icon: "💬",
     name: "IBM Chatbot Level 1",
     issuer: "IBM",
     certificateImage:
-      "/assets/build_your_own_chatbot-019d6160-3068-73f4-b164-7f9d66e95ae5.png",
+      "/assets/ibm_build_your_own_chatbot-019d6171-b884-755f-b561-a079993eb59c.png",
   },
   {
     icon: "✨",
@@ -268,7 +274,7 @@ const CERTS: CertEntry[] = [
     name: "DigiSkills Communication",
     issuer: "DigiSkills",
     certificateImage:
-      "/assets/communication_sftskill-019d6153-c7e1-756f-90d6-5628d09fa898.png",
+      "/assets/communication_softskill-019d6171-c057-724b-8c56-a99a46a3ae5a.png",
   },
   {
     icon: "🌐",
