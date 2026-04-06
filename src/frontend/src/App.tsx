@@ -28,66 +28,144 @@ const SERVICES = [
     icon: "🤖",
     title: "AI Agent Development",
     desc: "Custom AI agents that think and act autonomously",
+    details: [
+      "Custom AI agents tailored to business needs",
+      "Automates tasks and decision-making",
+      "Integrations with APIs and databases",
+      "Use cases: support, automation, analytics",
+    ],
   },
   {
     icon: "💬",
     title: "AI Chatbot Development",
     desc: "Intelligent chatbots that engage customers 24/7",
+    details: [
+      "24/7 customer support bots",
+      "Website + WhatsApp integration",
+      "NLP-based conversations",
+      "Lead capture + FAQs automation",
+    ],
   },
   {
     icon: "🎯",
     title: "Lead Generation Automation",
     desc: "Automated pipelines that capture and qualify leads",
+    details: [
+      "Automated lead capture systems",
+      "Funnels and qualification logic",
+      "CRM integration",
+      "Real-time notifications",
+    ],
   },
   {
     icon: "📧",
     title: "Email Auto-Reply Agents",
     desc: "Smart agents that respond to emails instantly",
+    details: [
+      "Smart email responders",
+      "Context-aware replies",
+      "Gmail/Outlook integration",
+      "Saves time and improves response rate",
+    ],
   },
   {
     icon: "📅",
     title: "Booking Automation",
     desc: "End-to-end calendar booking automation",
+    details: [
+      "Automated scheduling system",
+      "Calendar integrations",
+      "Reminders and confirmations",
+      "Reduces manual booking work",
+    ],
   },
   {
     icon: "🎙️",
     title: "Voice AI Agents",
     desc: "Conversational voice agents for customer support",
+    details: [
+      "Human-like voice assistants",
+      "Call handling automation",
+      "Customer support via voice",
+      "Real-time conversation handling",
+    ],
   },
   {
     icon: "🍽️",
     title: "Restaurant AI Systems",
     desc: "AI-powered ordering and management systems",
+    details: [
+      "AI ordering systems",
+      "Menu automation",
+      "Customer interaction bots",
+      "Order + management optimization",
+    ],
   },
   {
     icon: "🔄",
     title: "Workflow Automation",
     desc: "Streamline entire business operations",
+    details: [
+      "End-to-end process automation",
+      "Connect multiple tools",
+      "Reduce manual work",
+      "Increase efficiency",
+    ],
   },
   {
     icon: "🏢",
     title: "CRM Automation (GoHighLevel)",
     desc: "Full GHL setup and AI integrations",
+    details: [
+      "Full GHL setup",
+      "AI integrations inside CRM",
+      "Pipeline automation",
+      "Lead tracking system",
+    ],
   },
   {
     icon: "🔗",
     title: "API Integration",
     desc: "Connect all tools through API pipelines",
+    details: [
+      "Connect multiple platforms",
+      "Data syncing between tools",
+      "Custom API pipelines",
+      "Scalable architecture",
+    ],
   },
   {
     icon: "⚡",
     title: "Make.com Systems",
     desc: "Advanced automation scenarios at scale",
+    details: [
+      "Advanced automation scenarios",
+      "Multi-step workflows",
+      "Business process automation",
+      "Scalable systems",
+    ],
   },
   {
     icon: "🌿",
     title: "n8n Workflows",
     desc: "Self-hosted n8n workflow automation",
+    details: [
+      "Self-hosted automation",
+      "Custom workflow building",
+      "Full control systems",
+      "API + logic-based flows",
+    ],
   },
   {
     icon: "📋",
     title: "Airtable Automation",
     desc: "Intelligent Airtable bases with automation",
+    details: [
+      "Smart Airtable databases",
+      "Automated workflows",
+      "Data organization systems",
+      "Business dashboards",
+    ],
   },
 ];
 
@@ -129,17 +207,76 @@ const PROJECTS = [
   },
 ];
 
-const CERTS = [
-  { icon: "🧠", name: "IBM AI Foundations", issuer: "IBM" },
+type CertEntry = {
+  icon: string;
+  name: string;
+  issuer: string;
+  certificateImage?: string;
+};
+const CERTS: CertEntry[] = [
+  {
+    icon: "🧠",
+    name: "IBM AI Foundations",
+    issuer: "IBM",
+    certificateImage:
+      "/assets/ibm_ai_foundations-019d6160-1f57-768e-9a4c-c86af5ec8486.png",
+  },
   { icon: "📊", name: "IBM Machine Learning", issuer: "IBM" },
-  { icon: "💬", name: "IBM Chatbot Level 1", issuer: "IBM" },
-  { icon: "✨", name: "Microsoft Generative AI", issuer: "Microsoft" },
-  { icon: "☁️", name: "Azure AI Agents", issuer: "Microsoft" },
-  { icon: "⚡", name: "Make.com Advanced", issuer: "Make.com" },
-  { icon: "🤖", name: "UiPath RPA", issuer: "UiPath" },
-  { icon: "💼", name: "DigiSkills Freelancing", issuer: "DigiSkills" },
-  { icon: "🗣️", name: "DigiSkills Communication", issuer: "DigiSkills" },
-  { icon: "🌐", name: "Elements of AI", issuer: "MinnaLearn" },
+  {
+    icon: "💬",
+    name: "IBM Chatbot Level 1",
+    issuer: "IBM",
+    certificateImage:
+      "/assets/build_your_own_chatbot-019d6160-3068-73f4-b164-7f9d66e95ae5.png",
+  },
+  {
+    icon: "✨",
+    name: "Microsoft Generative AI",
+    issuer: "Microsoft",
+    certificateImage:
+      "/assets/microsoft_all-019d6160-2e3a-777f-887d-b095838a6bd6.png",
+  },
+  {
+    icon: "☁️",
+    name: "Azure AI Agents",
+    issuer: "Microsoft",
+    certificateImage: "/assets/azure-019d6153-b8b2-7448-b540-eb2f0f943985.png",
+  },
+  {
+    icon: "⚡",
+    name: "Make.com Advanced",
+    issuer: "Make.com",
+    certificateImage:
+      "/assets/make_advance-019d6153-9937-74df-ae0e-68b027b4de7f.png",
+  },
+  {
+    icon: "🤖",
+    name: "UiPath RPA",
+    issuer: "UiPath",
+    certificateImage:
+      "/assets/ui_path-019d6153-9cea-7568-bd15-503b0848690b.png",
+  },
+  {
+    icon: "💼",
+    name: "DigiSkills Freelancing",
+    issuer: "DigiSkills",
+    certificateImage:
+      "/assets/freelacing-019d6147-620f-7601-a1e2-59eac68a00b1.png",
+  },
+  {
+    icon: "🗣️",
+    name: "DigiSkills Communication",
+    issuer: "DigiSkills",
+    certificateImage:
+      "/assets/communication_sftskill-019d6153-c7e1-756f-90d6-5628d09fa898.png",
+  },
+  {
+    icon: "🌐",
+    name: "Elements of AI",
+    issuer: "MinnaLearn",
+    certificateImage:
+      "/assets/certificate-elements-of-ai-019d6153-c6de-70ae-860f-374db8f37f98.png",
+  },
 ];
 
 const WHY = [
@@ -2291,11 +2428,24 @@ function BeforeAfterSection({ openModal }: { openModal: () => void }) {
 
 export default function App() {
   const [showModal, setShowModal] = useState(false);
+  const [selectedService, setSelectedService] = useState<
+    (typeof SERVICES)[0] | null
+  >(null);
+  const [selectedCert, setSelectedCert] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [navScrolled, setNavScrolled] = useState(false);
 
   const openModal = () => setShowModal(true);
   const closeModal = () => setShowModal(false);
+
+  // Close service modal on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSelectedService(null);
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   // Animation hooks
   useScrollReveal();
@@ -2447,6 +2597,14 @@ export default function App() {
       document.body.style.overflow = "";
     };
   }, [showModal]);
+
+  useEffect(() => {
+    if (selectedCert) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [selectedCert]);
 
   const navLinks = [
     { label: "About", id: "about" },
@@ -3482,11 +3640,16 @@ My focus is on creating Agentic AI solutions — systems that can think, decide,
               key={s.title}
               data-ocid={`services.item.${i + 1}`}
               className="service-card premium-card"
+              onClick={() => setSelectedService(s)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") setSelectedService(s);
+              }}
               style={{
                 borderRadius: "16px",
                 padding: "1.75rem",
                 position: "relative",
                 overflow: "hidden",
+                cursor: "pointer",
               }}
             >
               <span
@@ -3662,10 +3825,20 @@ My focus is on creating Agentic AI solutions — systems that can think, decide,
               key={c.name}
               data-ocid={`certifications.item.${i + 1}`}
               className="service-card cert-card-anim premium-card"
+              onClick={() =>
+                c.certificateImage && setSelectedCert(c.certificateImage)
+              }
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && c.certificateImage)
+                  setSelectedCert(c.certificateImage);
+              }}
+              role={c.certificateImage ? "button" : undefined}
+              tabIndex={c.certificateImage ? 0 : undefined}
               style={{
                 borderRadius: "14px",
                 padding: "1.5rem 1rem",
                 textAlign: "center",
+                cursor: c.certificateImage ? "pointer" : undefined,
               }}
             >
               <div style={{ fontSize: "1.8rem", marginBottom: "0.75rem" }}>
@@ -3698,6 +3871,18 @@ My focus is on creating Agentic AI solutions — systems that can think, decide,
               >
                 {c.issuer}
               </span>
+              {c.certificateImage && (
+                <p
+                  style={{
+                    color: "#4f6fff",
+                    fontSize: "0.65rem",
+                    marginTop: "0.4rem",
+                    fontWeight: 600,
+                  }}
+                >
+                  View Certificate →
+                </p>
+              )}
             </div>
           ))}
         </div>
@@ -4294,7 +4479,249 @@ My focus is on creating Agentic AI solutions — systems that can think, decide,
           0%, 100% { transform: translateX(-50%) translateY(0); }
           50% { transform: translateX(-50%) translateY(8px); }
         }
+        @keyframes modalIn {
+          from { opacity: 0; transform: scale(0.92) translateY(20px); }
+          to { opacity: 1; transform: scale(1) translateY(0); }
+        }
       `}</style>
+
+      {/* ── CERTIFICATE IMAGE MODAL ── */}
+      {selectedCert && (
+        <div
+          onClick={() => setSelectedCert(null)}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setSelectedCert(null);
+          }}
+          role="presentation"
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 10000,
+            background: "rgba(0,0,0,0.9)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backdropFilter: "blur(10px)",
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+            style={{
+              position: "relative",
+              maxWidth: "90vw",
+              maxHeight: "90vh",
+              borderRadius: 16,
+              border: "1px solid rgba(79,111,255,0.4)",
+              boxShadow: "0 0 80px rgba(79,111,255,0.25)",
+              animation: "modalIn 0.3s ease",
+              background: "rgba(11,15,25,0.98)",
+              padding: "1rem",
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => setSelectedCert(null)}
+              style={{
+                position: "absolute",
+                top: "-12px",
+                right: "-12px",
+                background: "linear-gradient(135deg, #4f6fff, #9b5de5)",
+                border: "none",
+                color: "#fff",
+                borderRadius: "50%",
+                width: 36,
+                height: 36,
+                cursor: "pointer",
+                fontSize: "1rem",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 1,
+                boxShadow: "0 0 20px rgba(79,111,255,0.5)",
+              }}
+            >
+              ✕
+            </button>
+            <img
+              src={selectedCert}
+              alt="Certificate"
+              style={{
+                display: "block",
+                maxWidth: "80vw",
+                maxHeight: "80vh",
+                borderRadius: 10,
+                objectFit: "contain",
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ── SERVICE DETAIL MODAL ── */}
+      {selectedService && (
+        <div
+          data-ocid="services.modal"
+          onClick={() => setSelectedService(null)}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setSelectedService(null);
+          }}
+          role="presentation"
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9999,
+            background: "rgba(0,0,0,0.85)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backdropFilter: "blur(8px)",
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+            style={{
+              background: "rgba(11,15,25,0.95)",
+              border: "1px solid rgba(79,111,255,0.3)",
+              borderRadius: 20,
+              padding: "2.5rem",
+              maxWidth: 500,
+              width: "90%",
+              position: "relative",
+              boxShadow: "0 0 60px rgba(79,111,255,0.2)",
+              animation: "modalIn 0.3s ease",
+            }}
+          >
+            {/* Close button */}
+            <button
+              type="button"
+              data-ocid="services.modal.close_button"
+              onClick={() => setSelectedService(null)}
+              style={{
+                position: "absolute",
+                top: "1rem",
+                right: "1rem",
+                background: "rgba(255,255,255,0.08)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                color: "#fff",
+                borderRadius: 8,
+                width: 32,
+                height: 32,
+                cursor: "pointer",
+                fontSize: "1.1rem",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                lineHeight: 1,
+              }}
+            >
+              ✕
+            </button>
+
+            {/* Icon */}
+            <div style={{ fontSize: "2.5rem", marginBottom: "1rem" }}>
+              {selectedService.icon}
+            </div>
+
+            {/* Title */}
+            <h3
+              style={{
+                fontFamily: "Syne, sans-serif",
+                fontWeight: 800,
+                fontSize: "1.4rem",
+                color: "#fff",
+                marginBottom: "0.5rem",
+              }}
+            >
+              {selectedService.title}
+            </h3>
+
+            {/* Short desc */}
+            <p
+              style={{
+                color: "#9ca3af",
+                fontSize: "0.9rem",
+                marginBottom: "1.5rem",
+              }}
+            >
+              {selectedService.desc}
+            </p>
+
+            {/* Bullet list heading */}
+            <p
+              style={{
+                color: "#4f6fff",
+                fontWeight: 700,
+                fontSize: "0.85rem",
+                marginBottom: "0.75rem",
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+              }}
+            >
+              What&apos;s Included:
+            </p>
+
+            {/* Bullet list */}
+            <ul style={{ listStyleType: "none", padding: 0, margin: 0 }}>
+              {selectedService.details.map((item) => (
+                <li
+                  key={item}
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: "0.5rem",
+                    marginBottom: "0.4rem",
+                  }}
+                >
+                  <span
+                    style={{
+                      color: "#4f6fff",
+                      flexShrink: 0,
+                      marginTop: "0.1rem",
+                    }}
+                  >
+                    ✓
+                  </span>
+                  <span
+                    style={{
+                      color: "#d1d5db",
+                      fontSize: "0.9rem",
+                      lineHeight: 1.7,
+                    }}
+                  >
+                    {item}
+                  </span>
+                </li>
+              ))}
+            </ul>
+
+            {/* CTA button */}
+            <button
+              type="button"
+              data-ocid="services.modal.submit_button"
+              onClick={() => {
+                window.location.href = `mailto:nawazmubshar387@gmail.com?subject=Inquiry: ${selectedService.title}`;
+              }}
+              style={{
+                background: "linear-gradient(135deg, #4f6fff, #9b5de5)",
+                color: "#fff",
+                border: "none",
+                borderRadius: 12,
+                padding: "0.75rem 2rem",
+                fontFamily: "Syne, sans-serif",
+                fontWeight: 700,
+                cursor: "pointer",
+                marginTop: "1.5rem",
+                width: "100%",
+                fontSize: "1rem",
+              }}
+            >
+              Book a Call
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
