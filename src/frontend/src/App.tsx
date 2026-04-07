@@ -903,9 +903,31 @@ function ChatbotWidget() {
         msg.includes("service") ||
         msg.includes("what do you do") ||
         msg.includes("what can you build") ||
-        msg.includes("what does haseeb")
+        msg.includes("what does haseeb") ||
+        msg.includes("kya service") ||
+        msg.includes("kya kaam") ||
+        msg.includes("kya deta")
       ) {
-        return "Haseeb builds:\n🤖 AI Agents — custom intelligent agents\n⚡ Automation Systems — n8n, Make.com, Zapier\n🌐 Websites — modern, fast, premium\n💻 Custom Software — dashboards, tools, apps\n\nEven if your need is unique, tell me and I'll guide you! What are you looking for?";
+        return "Haseeb provides the following services:\n\n🤖 AI Agent Development — custom autonomous AI agents\n💬 AI Chatbot Development — 24/7 customer support bots\n🎯 Lead Generation Automation — auto-capture & qualify leads\n📧 Email Auto-Reply Agents — smart, context-aware email responders\n📅 Booking Automation — automated scheduling & calendar integration\n🎙️ Voice AI Agents — human-like voice assistants for customer support\n🍽️ Restaurant AI Systems — AI ordering, menu & management bots\n🔄 Workflow Automation — end-to-end business process automation\n🏢 CRM Automation (GoHighLevel) — full GHL setup & AI integration\n🔗 API Integration — connect multiple platforms & data pipelines\n⚡ Make.com Systems — advanced multi-step automation scenarios\n🌿 n8n Workflows — self-hosted custom automation workflows\n📋 Airtable Automation — smart databases & business dashboards\n\n💡 And if your requirement is unique or not listed here, Haseeb will build a custom solution tailored specifically for you — just describe your need!\n\nWhich service interests you most?";
+      }
+
+      // Certifications
+      if (
+        msg.includes("certif") ||
+        msg.includes("qualification") ||
+        msg.includes("degree") ||
+        msg.includes("course") ||
+        msg.includes("training") ||
+        msg.includes("ibm") ||
+        msg.includes("microsoft") ||
+        msg.includes("azure") ||
+        msg.includes("digiskills") ||
+        msg.includes("uipath") ||
+        msg.includes("elements of ai") ||
+        msg.includes("make.com cert") ||
+        msg.includes("certificate")
+      ) {
+        return "Haseeb holds the following certifications:\n\n🧠 IBM AI Foundations — IBM\n📊 IBM Machine Learning — IBM\n💬 IBM Chatbot Level 1 — IBM\n✨ Microsoft Generative AI — Microsoft\n☁️ Azure AI Agents — Microsoft\n⚡ Make.com Advanced — Make.com\n🤖 UiPath RPA — UiPath\n💼 DigiSkills Freelancing — DigiSkills\n🗣️ DigiSkills Communication — DigiSkills\n🌐 Elements of AI — MinnaLearn\n\nYou can view the actual certificate images by visiting the Certifications section on this website. Would you like to know more about any specific certification?";
       }
 
       // AI Agent path
@@ -1443,7 +1465,7 @@ function ChatbotWidget() {
             : "linear-gradient(135deg, #4f6fff, #9b5de5)",
           border: "none",
           cursor: "pointer",
-          fontSize: open ? "1.2rem" : "1.8rem",
+          fontSize: open ? "1.2rem" : "0",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -1460,7 +1482,21 @@ function ChatbotWidget() {
           transform: hovered ? "scale(1.12)" : "scale(1)",
         }}
       >
-        {open ? "✕" : "🤖"}
+        {open ? (
+          "✕"
+        ) : (
+          <img
+            src="/assets/generated/robot-assistant-transparent.dim_200x200.png"
+            alt="AI Assistant"
+            style={{
+              width: "44px",
+              height: "44px",
+              objectFit: "contain",
+              borderRadius: "50%",
+              display: "block",
+            }}
+          />
+        )}
       </button>
 
       {/* Notification dot */}
@@ -2440,6 +2476,11 @@ export default function App() {
   const [selectedCert, setSelectedCert] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [navScrolled, setNavScrolled] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<
+    { label: string; section: string; action: () => void; type: string }[]
+  >([]);
+  const [searchFocused, setSearchFocused] = useState(false);
 
   const openModal = () => setShowModal(true);
   const closeModal = () => setShowModal(false);
@@ -2612,6 +2653,109 @@ export default function App() {
     };
   }, [selectedCert]);
 
+  // Search handler
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    const q = query.toLowerCase();
+    const results: {
+      label: string;
+      section: string;
+      action: () => void;
+      type: string;
+    }[] = [];
+
+    // Search services
+    for (const s of SERVICES) {
+      if (
+        s.title.toLowerCase().includes(q) ||
+        s.desc.toLowerCase().includes(q) ||
+        s.details.some((d) => d.toLowerCase().includes(q))
+      ) {
+        results.push({
+          label: s.title,
+          section: "Service",
+          action: () => {
+            setSelectedService(s);
+            setSearchQuery("");
+            setSearchResults([]);
+          },
+          type: "service",
+        });
+      }
+    }
+
+    // Search sections
+    const sections = [
+      {
+        label: "About",
+        id: "about",
+        keywords: ["about", "who", "intro", "haseeb", "engineer"],
+      },
+      {
+        label: "Services",
+        id: "services",
+        keywords: ["services", "what", "offer", "work"],
+      },
+      {
+        label: "Projects",
+        id: "projects",
+        keywords: ["projects", "portfolio", "work", "built"],
+      },
+      {
+        label: "Certifications",
+        id: "certifications",
+        keywords: ["certifications", "certificates", "ibm", "microsoft"],
+      },
+      {
+        label: "FAQ",
+        id: "faq",
+        keywords: ["faq", "questions", "how", "price", "cost"],
+      },
+    ];
+    for (const sec of sections) {
+      if (
+        sec.label.toLowerCase().includes(q) ||
+        sec.keywords.some((k) => k.includes(q))
+      ) {
+        results.push({
+          label: sec.label,
+          section: "Section",
+          action: () => {
+            scrollTo(sec.id);
+            setSearchQuery("");
+            setSearchResults([]);
+          },
+          type: "section",
+        });
+      }
+    }
+
+    // Search certifications
+    for (const c of CERTS) {
+      if (
+        c.name.toLowerCase().includes(q) ||
+        c.issuer.toLowerCase().includes(q)
+      ) {
+        results.push({
+          label: c.name,
+          section: `Certificate — ${c.issuer}`,
+          action: () => {
+            if (c.certificateImage) setSelectedCert(c.certificateImage);
+            setSearchQuery("");
+            setSearchResults([]);
+          },
+          type: "cert",
+        });
+      }
+    }
+
+    setSearchResults(results.slice(0, 8));
+  };
+
   const navLinks = [
     { label: "About", id: "about" },
     { label: "Services", id: "services" },
@@ -2772,6 +2916,271 @@ export default function App() {
           </div>
         )}
       </nav>
+
+      {/* ── SEARCH BAR ── */}
+      <div
+        style={{
+          background: "rgba(4,5,10,0.95)",
+          borderBottom: "1px solid rgba(79,111,255,0.1)",
+          padding: "1.2rem max(1.5rem, calc((100vw - 900px)/2))",
+          position: "relative",
+          zIndex: 100,
+        }}
+      >
+        {/* Search input container */}
+        <div
+          style={{ position: "relative", maxWidth: "860px", margin: "0 auto" }}
+        >
+          <div
+            style={{
+              position: "relative",
+              display: "flex",
+              alignItems: "center",
+              background: searchFocused
+                ? "rgba(79,111,255,0.08)"
+                : "rgba(255,255,255,0.04)",
+              border: `1.5px solid ${searchFocused ? "rgba(79,111,255,0.5)" : "rgba(255,255,255,0.08)"}`,
+              borderRadius: "14px",
+              transition: "all 0.3s ease",
+              boxShadow: searchFocused
+                ? "0 0 20px rgba(79,111,255,0.15)"
+                : "none",
+            }}
+          >
+            {/* Search icon */}
+            <span
+              style={{
+                padding: "0 1rem",
+                fontSize: "1.1rem",
+                color: searchFocused ? "#4f6fff" : "#6b7280",
+                transition: "color 0.3s",
+                userSelect: "none",
+              }}
+            >
+              🔍
+            </span>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  setSearchQuery("");
+                  setSearchResults([]);
+                }
+                if (e.key === "Enter" && searchResults.length > 0) {
+                  searchResults[0].action();
+                }
+              }}
+              placeholder="Search services, projects, certifications..."
+              style={{
+                flex: 1,
+                background: "none",
+                border: "none",
+                outline: "none",
+                color: "#e8eaf6",
+                fontFamily: "DM Sans, sans-serif",
+                fontSize: "0.95rem",
+                padding: "0.9rem 0.5rem",
+              }}
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery("");
+                  setSearchResults([]);
+                }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#6b7280",
+                  cursor: "pointer",
+                  padding: "0 1rem",
+                  fontSize: "1rem",
+                  lineHeight: 1,
+                }}
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          {/* Search results dropdown */}
+          {searchResults.length > 0 && searchFocused && (
+            <div
+              style={{
+                position: "absolute",
+                top: "calc(100% + 8px)",
+                left: 0,
+                right: 0,
+                background: "rgba(11,15,25,0.98)",
+                border: "1px solid rgba(79,111,255,0.25)",
+                borderRadius: "14px",
+                boxShadow:
+                  "0 20px 60px rgba(0,0,0,0.6), 0 0 30px rgba(79,111,255,0.1)",
+                backdropFilter: "blur(16px)",
+                zIndex: 200,
+                overflow: "hidden",
+                animation: "fadeSlideUp 0.2s ease",
+              }}
+            >
+              {searchResults.map((result, i) => (
+                <button
+                  type="button"
+                  key={`${result.label}-${i}`}
+                  onClick={result.action}
+                  style={{
+                    width: "100%",
+                    background: "none",
+                    border: "none",
+                    borderBottom:
+                      i < searchResults.length - 1
+                        ? "1px solid rgba(255,255,255,0.05)"
+                        : "none",
+                    color: "#e8eaf6",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.75rem",
+                    padding: "0.75rem 1.25rem",
+                    cursor: "pointer",
+                    textAlign: "left",
+                    transition: "background 0.2s",
+                    fontFamily: "DM Sans, sans-serif",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background =
+                      "rgba(79,111,255,0.1)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = "none";
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "0.8rem",
+                      padding: "2px 10px",
+                      borderRadius: "100px",
+                      background:
+                        result.type === "service"
+                          ? "rgba(79,111,255,0.15)"
+                          : result.type === "cert"
+                            ? "rgba(155,93,229,0.15)"
+                            : "rgba(0,212,255,0.15)",
+                      color:
+                        result.type === "service"
+                          ? "#93c5fd"
+                          : result.type === "cert"
+                            ? "#c4b5fd"
+                            : "#67e8f9",
+                      border: `1px solid ${result.type === "service" ? "rgba(79,111,255,0.3)" : result.type === "cert" ? "rgba(155,93,229,0.3)" : "rgba(0,212,255,0.3)"}`,
+                      flexShrink: 0,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {result.section}
+                  </span>
+                  <span style={{ fontWeight: 500, fontSize: "0.9rem" }}>
+                    {result.label}
+                  </span>
+                  <span
+                    style={{
+                      marginLeft: "auto",
+                      color: "#4b5563",
+                      fontSize: "0.85rem",
+                    }}
+                  >
+                    →
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Quick links below search */}
+        <div
+          style={{
+            maxWidth: "860px",
+            margin: "0.75rem auto 0",
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "0.5rem",
+            alignItems: "center",
+          }}
+        >
+          <span
+            style={{
+              color: "#4b5563",
+              fontSize: "0.8rem",
+              marginRight: "0.25rem",
+              flexShrink: 0,
+            }}
+          >
+            Quick:
+          </span>
+          {[
+            {
+              label: "🤖 AI Agents",
+              action: () => setSelectedService(SERVICES[0]),
+            },
+            {
+              label: "💬 Chatbots",
+              action: () => setSelectedService(SERVICES[1]),
+            },
+            {
+              label: "⚡ Make.com",
+              action: () => setSelectedService(SERVICES[10]),
+            },
+            { label: "🌿 n8n", action: () => setSelectedService(SERVICES[11]) },
+            {
+              label: "🎯 Lead Gen",
+              action: () => setSelectedService(SERVICES[2]),
+            },
+            { label: "📂 Services", action: () => scrollTo("services") },
+            { label: "🏆 Projects", action: () => scrollTo("projects") },
+            {
+              label: "📜 Certifications",
+              action: () => scrollTo("certifications"),
+            },
+          ].map((tag) => (
+            <button
+              key={tag.label}
+              type="button"
+              onClick={tag.action}
+              className="search-quick-tag"
+              style={{
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                borderRadius: "100px",
+                color: "#9ca3af",
+                fontSize: "0.78rem",
+                padding: "4px 12px",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                fontFamily: "DM Sans, sans-serif",
+                whiteSpace: "nowrap",
+              }}
+              onMouseEnter={(e) => {
+                const el = e.currentTarget as HTMLElement;
+                el.style.background = "rgba(79,111,255,0.12)";
+                el.style.borderColor = "rgba(79,111,255,0.35)";
+                el.style.color = "#93c5fd";
+              }}
+              onMouseLeave={(e) => {
+                const el = e.currentTarget as HTMLElement;
+                el.style.background = "rgba(255,255,255,0.04)";
+                el.style.borderColor = "rgba(255,255,255,0.08)";
+                el.style.color = "#9ca3af";
+              }}
+            >
+              {tag.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* ── HERO ── */}
       <section
